@@ -169,22 +169,26 @@
         </div>
     </section>
 
-    <section id="catalogo" class="py-5 bg-white border-top">
+   <section id="catalogo" class="py-5 bg-white border-top">
         <div class="container">
             <div class="row justify-content-between align-items-center mb-4 g-3">
                 <div class="col-12 col-md-6">
                     <h4 class="fw-normal mb-0">Modelos disponibles</h4>
                 </div>
                 <div class="col-12 col-md-6">
-                    <form action="index.php" method="GET" class="d-flex gap-2">
+                    <form action="index.php#catalogo" method="GET" class="d-flex gap-2">
                         <input type="hidden" name="action" value="buscar">
-                        <input type="text" name="q" class="form-control form-control-sm" placeholder="Buscar modelo...">
+                        <input type="text" name="q" class="form-control form-control-sm" placeholder="Buscar modelo..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
                         <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+                        <?php if (!empty($_GET['q'])): ?>
+                            <a href="index.php#catalogo" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+                        <?php endif; ?>
                     </form>
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <!-- Tabla conectada a MySQL (Criterio 12) -->
+            <div class="table-responsive mb-5">
                 <table class="table table-bordered align-middle small">
                     <thead class="table-light">
                         <tr>
@@ -200,42 +204,57 @@
                             <?php foreach ($listaProductos as $item): ?>
                                 <tr>
                                     <td><?= $item['id'] ?></td>
-                                    <td><?= $item['nombre'] ?></td>
-                                    <td><?= $item['categoria'] ?></td>
-                                    <td><?= $item['precio'] ?>$</td>
+                                    <td><?= htmlspecialchars($item['nombre']) ?></td>
+                                    <td><?= htmlspecialchars($item['categoria'] ?? 'Diadema') ?></td>
+                                    <td><?= number_format($item['precio'], 0) ?>$</td>
                                     <td>
-                                        <a href="index.php?action=eliminar&id=<?= $item['id'] ?>" class="btn btn-danger btn-sm">Eliminar</a>
+                                        <a href="index.php?action=editar&id=<?= $item['id'] ?>#catalogo" class="btn btn-outline-dark btn-sm">Editar</a>
+                                        <a href="index.php?action=eliminar&id=<?= $item['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este modelo?')">Eliminar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td>1</td>
-                                <td>AirPods Max Blanco</td>
-                                <td>Diadema</td>
-                                <td>549$</td>
-                                <td><a href="index.php?action=eliminar&id=1" class="btn btn-outline-danger btn-sm">Eliminar</a></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>AirPods Max Azul</td>
-                                <td>Diadema</td>
-                                <td>549$</td>
-                                <td><a href="index.php?action=eliminar&id=2" class="btn btn-outline-danger btn-sm">Eliminar</a></td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>AirPods Max Verde</td>
-                                <td>Diadema</td>
-                                <td>549$</td>
-                                <td><a href="index.php?action=eliminar&id=3" class="btn btn-outline-danger btn-sm">Eliminar</a></td>
+                                <td colspan="5" class="text-center text-secondary">No hay modelos registrados en la base de datos.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Formulario CRUD Crear / Editar por POST (Criterios 13 y 14) -->
+            <div class="bloque-gris p-4">
+                <h5 class="fw-normal mb-3"><?= !empty($productoEditar) ? 'Editar modelo' : 'Agregar nuevo modelo al catálogo' ?></h5>
+                <form action="index.php" method="POST" class="row g-3 align-items-end">
+                    <input type="hidden" name="id" value="<?= $productoEditar['id'] ?? '' ?>">
+                    <input type="hidden" name="categoria_id" value="1">
+                    <input type="hidden" name="imagen" value="assets/img/airpods-hero.png">
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small text-secondary">Nombre del modelo</label>
+                        <input type="text" name="nombre" class="form-control form-control-sm" placeholder="Ej. AirPods Max Naranja" required value="<?= htmlspecialchars($productoEditar['nombre'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small text-secondary">Descripción</label>
+                        <input type="text" name="descripcion" class="form-control form-control-sm" placeholder="Ej. Audio espacial" required value="<?= htmlspecialchars($productoEditar['descripcion'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label class="form-label small text-secondary">Precio ($)</label>
+                        <input type="number" step="0.01" name="precio" class="form-control form-control-sm" placeholder="549" required value="<?= $productoEditar['precio'] ?? '' ?>">
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <?= !empty($productoEditar) ? 'Actualizar' : 'Guardar' ?>
+                        </button>
+                        <?php if (!empty($productoEditar)): ?>
+                            <a href="index.php#catalogo" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+                        <?php endif; ?>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
+                            
 
     <section id="contacto" class="bloque-gris py-5 position-relative overflow-hidden">
         <div class="container py-5">
